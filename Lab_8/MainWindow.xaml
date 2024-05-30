@@ -8,7 +8,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="0">
-            <Button Content="Edit Table" Click="EditTable_Click" Width="100" Margin="5" HorizontalAlignment="Center"/>
+            <Button Content="Load Data" Click="LoadData_Click" Width="100" Margin="5"/>
+            <Button Content="Edit Table" Click="EditRecords_Click" Width="100" Margin="5"/>
         </StackPanel>
         <DataGrid x:Name="MedicalRecordsDataGrid" AutoGenerateColumns="False" Grid.Row="1" Margin="10" IsReadOnly="True">
             <DataGrid.Columns>

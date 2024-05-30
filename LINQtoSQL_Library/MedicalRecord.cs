@@ -4,6 +4,7 @@ namespace LINQtoData_Library
 {
     public class MedicalRecord
     {
+        public int RecordID { get; set; }
         public int DoctorID { get; set; }
         public int PatientID { get; set; }
         public string DoctorName { get; set; }

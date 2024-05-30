@@ -2,55 +2,40 @@
 using System.Data;
 using System.Linq;
 using System.Windows;
+using LINQtoData_Library;
 
 namespace Lab_8
 {
     public partial class EditRecordsWindow : Window
     {
-        private DataSet dataSet;
-        private dynamic selectedRecord;
+        private readonly MedicalDataSet _dataSet;
+        private readonly MainWindow _mainWindow;
 
-        public EditRecordsWindow(DataSet ds, dynamic record = null)
+        public EditRecordsWindow(MedicalDataSet dataSet, MainWindow mainWindow)
         {
             InitializeComponent();
-            dataSet = ds;
-            selectedRecord = record;
+            _dataSet = dataSet;
+            _mainWindow = mainWindow;
             LoadComboBoxes();
-            if (selectedRecord != null)
-            {
-                PopulateFields();
-            }
         }
 
         private void LoadComboBoxes()
         {
-            var doctors = dataSet.Tables["Doctors"].AsEnumerable()
-                .Select(row => new
-                {
-                    DoctorID = row.Field<int>("DoctorID"),
-                    FullName = row.Field<string>("FullName")
-                }).ToList();
+            var doctors = from doctor in _dataSet.DoctorsTable.AsEnumerable()
+                          select new
+                          {
+                              DoctorID = doctor.Field<int>("DoctorID"),
+                              FullName = doctor.Field<string>("FullName")
+                          };
 
-            DoctorsComboBox.ItemsSource = doctors;
+            var diagnoses = (from record in _dataSet.MedicalRecordsTable.AsEnumerable()
+                             select record.Field<string>("Diagnosis")).Distinct();
+
+            DoctorsComboBox.ItemsSource = doctors.ToList();
             DoctorsComboBox.DisplayMemberPath = "FullName";
             DoctorsComboBox.SelectedValuePath = "DoctorID";
 
-            var diagnoses = dataSet.Tables["MedicalRecords"].AsEnumerable()
-                .Select(row => row.Field<string>("Diagnosis"))
-                .Distinct().ToList();
-
-            DiagnosisComboBox.ItemsSource = diagnoses;
-        }
-
-        private void PopulateFields()
-        {
-            DoctorsComboBox.SelectedValue = selectedRecord.DoctorID;
-            PatientNameTextBox.Text = selectedRecord.PatientName;
-            BirthYearTextBox.Text = selectedRecord.BirthYear.ToString();
-            HeightTextBox.Text = selectedRecord.Height.ToString();
-            WeightTextBox.Text = selectedRecord.Weight.ToString();
-            BloodPressureTextBox.Text = selectedRecord.BloodPressure;
-            DiagnosisComboBox.SelectedItem = selectedRecord.Diagnosis;
+            DiagnosisComboBox.ItemsSource = diagnoses.ToList();
         }
 
         private void Create_Click(object sender, RoutedEventArgs e)
@@ -69,27 +54,31 @@ namespace Lab_8
                 return;
             }
 
-            DataRow newPatientRow = dataSet.Tables["Patients"].NewRow();
-            newPatientRow["FullName"] = PatientNameTextBox.Text;
-            newPatientRow["BirthYear"] = int.Parse(BirthYearTextBox.Text);
-            newPatientRow["Height"] = decimal.Parse(HeightTextBox.Text);
-            newPatientRow["Weight"] = decimal.Parse(WeightTextBox.Text);
-            newPatientRow["BloodPressure"] = BloodPressureTextBox.Text;
-            dataSet.Tables["Patients"].Rows.Add(newPatientRow);
+            Patient patient = new Patient
+            {
+                FullName = PatientNameTextBox.Text,
+                BirthYear = int.Parse(BirthYearTextBox.Text),
+                Height = int.Parse(HeightTextBox.Text),
+                Weight = int.Parse(WeightTextBox.Text),
+                BloodPressure = BloodPressureTextBox.Text
+            };
 
-            DataRow newMedicalRecordRow = dataSet.Tables["MedicalRecords"].NewRow();
-            newMedicalRecordRow["DoctorID"] = ((dynamic)doctor).DoctorID;
-            newMedicalRecordRow["PatientID"] = newPatientRow["PatientID"];
-            newMedicalRecordRow["Diagnosis"] = diagnosis;
-            newMedicalRecordRow["ExaminationDate"] = DateTime.Now;
-            dataSet.Tables["MedicalRecords"].Rows.Add(newMedicalRecordRow);
+            MedicalRecord record = new MedicalRecord
+            {
+                DoctorID = (int)doctor.GetType().GetProperty("DoctorID").GetValue(doctor),
+                Diagnosis = diagnosis,
+                ExaminationDate = DateTime.Now
+            };
+
+            _mainWindow.CreateRecord(record, patient);
         }
 
         private void Update_Click(object sender, RoutedEventArgs e)
         {
+            var selectedRecord = _mainWindow.MedicalRecordsDataGrid.SelectedItem as dynamic;
             if (selectedRecord == null)
             {
-                MessageBox.Show("No record selected for update.");
+                MessageBox.Show("Please select a record to update.");
                 return;
             }
 
@@ -107,42 +96,43 @@ namespace Lab_8
                 return;
             }
 
-            DataRow patientRow = dataSet.Tables["Patients"].Rows
-                .Cast<DataRow>()
-                .First(row => row.Field<int>("PatientID") == selectedRecord.PatientID);
-            patientRow["FullName"] = PatientNameTextBox.Text;
-            patientRow["BirthYear"] = int.Parse(BirthYearTextBox.Text);
-            patientRow["Height"] = decimal.Parse(HeightTextBox.Text);
-            patientRow["Weight"] = decimal.Parse(WeightTextBox.Text);
-            patientRow["BloodPressure"] = BloodPressureTextBox.Text;
+            Patient patient = new Patient
+            {
+                PatientID = selectedRecord.PatientID,
+                FullName = PatientNameTextBox.Text,
+                BirthYear = int.Parse(BirthYearTextBox.Text),
+                Height = int.Parse(HeightTextBox.Text),
+                Weight = int.Parse(WeightTextBox.Text),
+                BloodPressure = BloodPressureTextBox.Text
+            };
 
-            DataRow medicalRecordRow = dataSet.Tables["MedicalRecords"].Rows
-                .Cast<DataRow>()
-                .First(row => row.Field<int>("DoctorID") == selectedRecord.DoctorID &&
-                              row.Field<int>("PatientID") == selectedRecord.PatientID);
-            medicalRecordRow["DoctorID"] = ((dynamic)doctor).DoctorID;
-            medicalRecordRow["Diagnosis"] = diagnosis;
-            medicalRecordRow["ExaminationDate"] = DateTime.Now;
+            MedicalRecord record = new MedicalRecord
+            {
+                RecordID = selectedRecord.RecordID,
+                DoctorID = (int)doctor.GetType().GetProperty("DoctorID").GetValue(doctor),
+                Diagnosis = diagnosis,
+                ExaminationDate = DateTime.Now
+            };
+
+            _mainWindow.UpdateRecord(record, patient);
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
+            var selectedRecord = _mainWindow.MedicalRecordsDataGrid.SelectedItem as dynamic;
             if (selectedRecord == null)
             {
-                MessageBox.Show("No record selected for deletion.");
+                MessageBox.Show("Please select a record to delete.");
                 return;
             }
 
-            DataRow patientRow = dataSet.Tables["Patients"].Rows
-                .Cast<DataRow>()
-                .First(row => row.Field<int>("PatientID") == selectedRecord.PatientID);
-            DataRow medicalRecordRow = dataSet.Tables["MedicalRecords"].Rows
-                .Cast<DataRow>()
-                .First(row => row.Field<int>("DoctorID") == selectedRecord.DoctorID &&
-                              row.Field<int>("PatientID") == selectedRecord.PatientID);
+            MedicalRecord record = new MedicalRecord
+            {
+                RecordID = selectedRecord.RecordID,
+                PatientID = selectedRecord.PatientID
+            };
 
-            patientRow.Delete();
-            medicalRecordRow.Delete();
+            _mainWindow.DeleteRecord(record);
         }
     }
 }

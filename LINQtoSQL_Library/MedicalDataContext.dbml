@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="OOPaP_67" Class="MedicalDataContextDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=DESKTOP-2GTDQ2V\SQLEXPRESS;Initial Catalog=OOPaP_67;Integrated Security=True;Encrypt=False" SettingsObjectName="LINQtoSQL_Library.Properties.Settings" SettingsPropertyName="OOPaP_67ConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Doctors" Member="Doctors">
+    <Type Name="Doctors">
+      <Column Name="DoctorID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="FullName" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Association Name="Doctors_MedicalRecords" Member="MedicalRecords" ThisKey="DoctorID" OtherKey="DoctorID" Type="MedicalRecords" />
+    </Type>
+  </Table>
+  <Table Name="dbo.MedicalRecords" Member="MedicalRecords">
+    <Type Name="MedicalRecords">
+      <Column Name="RecordID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="DoctorID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PatientID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Diagnosis" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="ExaminationDate" Type="System.DateTime" DbType="Date NOT NULL" CanBeNull="false" />
+      <Association Name="Doctors_MedicalRecords" Member="Doctors" ThisKey="DoctorID" OtherKey="DoctorID" Type="Doctors" IsForeignKey="true" />
+      <Association Name="Patients_MedicalRecords" Member="Patients" ThisKey="PatientID" OtherKey="PatientID" Type="Patients" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Patients" Member="Patients">
+    <Type Name="Patients">
+      <Column Name="PatientID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="FullName" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="BirthYear" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Height" Type="System.Decimal" DbType="Decimal(5,2) NOT NULL" CanBeNull="false" />
+      <Column Name="Weight" Type="System.Decimal" DbType="Decimal(5,2) NOT NULL" CanBeNull="false" />
+      <Column Name="BloodPressure" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
+      <Association Name="Patients_MedicalRecords" Member="MedicalRecords" ThisKey="PatientID" OtherKey="PatientID" Type="MedicalRecords" />
+    </Type>
+  </Table>
+</Database>

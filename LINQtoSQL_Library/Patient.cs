@@ -1,4 +1,4 @@
-﻿namespace ClassLibraryForOOPaP_6_7
+﻿namespace LINQtoData_Library
 {
     public class Patient
     {

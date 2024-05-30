@@ -1,8 +1,9 @@
-﻿using System;
+﻿
+using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows;
-using System.Data.SqlClient;
 
 namespace Lab_8
 {
@@ -52,17 +53,34 @@ namespace Lab_8
                         on medicalRecord.Field<int>("PatientID") equals patient.Field<int>("PatientID")
                         select new
                         {
+                            DoctorID = medicalRecord.Field<int>("DoctorID"),
+                            PatientID = medicalRecord.Field<int>("PatientID"),
                             DoctorName = doctor.Field<string>("FullName"),
                             PatientName = patient.Field<string>("FullName"),
                             BirthYear = patient.Field<int>("BirthYear"),
-                            Height = patient.Field<int>("Height"),
-                            Weight = patient.Field<int>("Weight"),
+                            Height = patient.Field<decimal>("Height"),
+                            Weight = patient.Field<decimal>("Weight"),
                             BloodPressure = patient.Field<string>("BloodPressure"),
                             Diagnosis = medicalRecord.Field<string>("Diagnosis"),
                             ExaminationDate = medicalRecord.Field<DateTime>("ExaminationDate").ToString("yyyy-MM-dd")
                         };
 
             MedicalRecordsDataGrid.ItemsSource = query.ToList();
+        }
+
+        private void EditTable_Click(object sender, RoutedEventArgs e)
+        {
+            if (MedicalRecordsDataGrid.SelectedItem is null)
+            {
+                MessageBox.Show("Please select a record to edit.");
+            }
+            else
+            {
+                var selectedRecord = (dynamic)MedicalRecordsDataGrid.SelectedItem;
+                var editWindow = new EditRecordsWindow(dataSet, selectedRecord);
+                editWindow.ShowDialog();
+                LoadData(); // Refresh the data grid after editing
+            }
         }
     }
 }

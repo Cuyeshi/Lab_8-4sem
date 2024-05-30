@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace LINQtoSQL_Library
+namespace LINQtoData_Library
 {
     public class Repository<T> where T : class, new()
     {

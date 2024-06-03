@@ -1,187 +1,163 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Windows;
-using LINQtoData_Library;
+using System.Windows.Controls;
+using System.Data.Linq;
+using LINQtoSQL_Library;
 
 namespace Lab_8
 {
     public partial class MainWindow : Window
     {
-        private readonly MedicalDataSet _dataSet = new MedicalDataSet();
-        private readonly string _connectionString = "Data Source=DESKTOP-2GTDQ2V\\SQLEXPRESS;Initial Catalog=OOPaP_67;Integrated Security=True";
+        private DataContext _dataContext;
 
         public MainWindow()
         {
             InitializeComponent();
-            LoadData();
+            LoadTableComboBox();
         }
 
-        private void LoadData_Click(object sender, RoutedEventArgs e)
+        private void LoadTableComboBox()
+        {
+            TableComboBox.Items.Add("Doctors");
+            TableComboBox.Items.Add("Patients");
+            TableComboBox.Items.Add("MedicalRecords");
+        }
+
+        private void TableComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             LoadData();
         }
 
         private void LoadData()
         {
-            using (var connection = new SqlConnection(_connectionString))
+            _dataContext = new DataContext("Data Source=DESKTOP-2GTDQ2V\\SQLEXPRESS;Initial " +
+                                                    "Catalog=OOPaP_67;Integrated Security=True");
+
+            switch (TableComboBox.SelectedItem.ToString())
             {
-                connection.Open();
-
-                SqlDataAdapter doctorAdapter = new SqlDataAdapter("SELECT * FROM Doctors", connection);
-                doctorAdapter.Fill(_dataSet.DoctorsTable);
-
-                SqlDataAdapter patientAdapter = new SqlDataAdapter("SELECT * FROM Patients", connection);
-                patientAdapter.Fill(_dataSet.PatientsTable);
-
-                SqlDataAdapter medicalRecordAdapter = new SqlDataAdapter("SELECT * FROM MedicalRecords", connection);
-                medicalRecordAdapter.Fill(_dataSet.MedicalRecordsTable);
+                case "Doctors":
+                    RecordsDataGrid.ItemsSource = _dataContext.GetTable<Doctors>().ToList();
+                    break;
+                case "Patients":
+                    RecordsDataGrid.ItemsSource = _dataContext.GetTable<Patients>().ToList();
+                    break;
+                case "MedicalRecords":
+                    RecordsDataGrid.ItemsSource = _dataContext.GetTable<MedicalRecords>().ToList();
+                    break;
             }
+        }
 
-            var query = from record in _dataSet.MedicalRecordsTable.AsEnumerable()
-                        join doctor in _dataSet.DoctorsTable.AsEnumerable() on record.Field<int>("DoctorID") equals doctor.Field<int>("DoctorID")
-                        join patient in _dataSet.PatientsTable.AsEnumerable() on record.Field<int>("PatientID") equals patient.Field<int>("PatientID")
-                        select new
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (TableComboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("Please select a table.");
+                    return;
+                }
+
+                switch (TableComboBox.SelectedItem.ToString())
+                {
+                    case "Doctors":
+                        var newDoctor = new Doctors
                         {
-                            DoctorName = doctor.Field<string>("FullName"),
-                            PatientName = patient.Field<string>("FullName"),
-                            BirthYear = patient.Field<int>("BirthYear"),
-                            Height = patient.Field<int>("Height"),
-                            Weight = patient.Field<int>("Weight"),
-                            BloodPressure = patient.Field<string>("BloodPressure"),
-                            Diagnosis = record.Field<string>("Diagnosis"),
-                            ExaminationDate = record.Field<DateTime>("ExaminationDate")
+                            FullName = FullNameTextBox.Text
                         };
 
-            MedicalRecordsDataGrid.ItemsSource = query.ToList();
-        }
+                        if (string.IsNullOrEmpty(newDoctor.FullName))
+                        {
+                            MessageBox.Show("Full Name is required for Doctors.");
+                            return;
+                        }
 
-        private void EditRecords_Click(object sender, RoutedEventArgs e)
-        {
-            EditRecordsWindow editWindow = new EditRecordsWindow(_dataSet, this);
-            editWindow.ShowDialog();
-        }
+                        _dataContext.GetTable<Doctors>().InsertOnSubmit(newDoctor);
+                        break;
 
-        public void CreateRecord(MedicalRecord record, Patient patient)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        SqlCommand insertPatientCommand = new SqlCommand(
-                            "INSERT INTO Patients (FullName, BirthYear, Height, Weight, BloodPressure) VALUES (@FullName, @BirthYear, @Height, @Weight, @BloodPressure); SELECT CAST(scope_identity() AS int)",
-                            connection, transaction);
-                        insertPatientCommand.Parameters.AddWithValue("@FullName", patient.FullName);
-                        insertPatientCommand.Parameters.AddWithValue("@BirthYear", patient.BirthYear);
-                        insertPatientCommand.Parameters.AddWithValue("@Height", patient.Height);
-                        insertPatientCommand.Parameters.AddWithValue("@Weight", patient.Weight);
-                        insertPatientCommand.Parameters.AddWithValue("@BloodPressure", patient.BloodPressure);
+                    case "Patients":
+                        if (string.IsNullOrEmpty(FullNameTextBox.Text) ||
+                            string.IsNullOrEmpty(BirthYearTextBox.Text) ||
+                            string.IsNullOrEmpty(HeightTextBox.Text) ||
+                            string.IsNullOrEmpty(WeightTextBox.Text) ||
+                            string.IsNullOrEmpty(BloodPressureTextBox.Text))
+                        {
+                            MessageBox.Show("All fields are required for Patients.");
+                            return;
+                        }
 
-                        patient.PatientID = (int)insertPatientCommand.ExecuteScalar();
+                        var newPatient = new Patients
+                        {
+                            FullName = FullNameTextBox.Text,
+                            BirthYear = int.Parse(BirthYearTextBox.Text),
+                            Height = int.Parse(HeightTextBox.Text),
+                            Weight = int.Parse(WeightTextBox.Text),
+                            BloodPressure = BloodPressureTextBox.Text
+                        };
 
-                        SqlCommand insertMedicalRecordCommand = new SqlCommand(
-                            "INSERT INTO MedicalRecords (DoctorID, PatientID, Diagnosis, ExaminationDate) VALUES (@DoctorID, @PatientID, @Diagnosis, @ExaminationDate)",
-                            connection, transaction);
-                        insertMedicalRecordCommand.Parameters.AddWithValue("@DoctorID", record.DoctorID);
-                        insertMedicalRecordCommand.Parameters.AddWithValue("@PatientID", patient.PatientID);
-                        insertMedicalRecordCommand.Parameters.AddWithValue("@Diagnosis", record.Diagnosis);
-                        insertMedicalRecordCommand.Parameters.AddWithValue("@ExaminationDate", record.ExaminationDate);
+                        _dataContext.GetTable<Patients>().InsertOnSubmit(newPatient);
+                        break;
 
-                        insertMedicalRecordCommand.ExecuteNonQuery();
+                    case "MedicalRecords":
+                        if (string.IsNullOrEmpty(FullNameTextBox.Text) ||
+                            string.IsNullOrEmpty(BirthYearTextBox.Text) ||
+                            string.IsNullOrEmpty(HeightTextBox.Text) ||
+                            string.IsNullOrEmpty(WeightTextBox.Text) ||
+                            string.IsNullOrEmpty(BloodPressureTextBox.Text))
+                        {
+                            MessageBox.Show("All fields are required for Medical Records.");
+                            return;
+                        }
 
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        MessageBox.Show($"Error: {ex.Message}");
-                    }
+                        var newRecord = new MedicalRecords
+                        {
+                            DoctorID = int.Parse(BirthYearTextBox.Text), // Example value, replace with actual input
+                            PatientID = int.Parse(HeightTextBox.Text), // Example value, replace with actual input
+                            Diagnosis = WeightTextBox.Text, // Example value, replace with actual input
+                            ExaminationDate = DateTime.Now
+                        };
+
+                        _dataContext.GetTable<MedicalRecords>().InsertOnSubmit(newRecord);
+                        break;
                 }
-            }
-            LoadData();
-        }
 
-        public void UpdateRecord(MedicalRecord record, Patient patient)
-        {
-            using (var connection = new SqlConnection(_connectionString))
+                _dataContext.SubmitChanges();
+                LoadData();
+            }
+            catch (Exception ex)
             {
-                connection.Open();
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        SqlCommand updatePatientCommand = new SqlCommand(
-                            "UPDATE Patients SET FullName = @FullName, BirthYear = @BirthYear, Height = @Height, Weight = @Weight, BloodPressure = @BloodPressure WHERE PatientID = @PatientID",
-                            connection, transaction);
-                        updatePatientCommand.Parameters.AddWithValue("@FullName", patient.FullName);
-                        updatePatientCommand.Parameters.AddWithValue("@BirthYear", patient.BirthYear);
-                        updatePatientCommand.Parameters.AddWithValue("@Height", patient.Height);
-                        updatePatientCommand.Parameters.AddWithValue("@Weight", patient.Weight);
-                        updatePatientCommand.Parameters.AddWithValue("@BloodPressure", patient.BloodPressure);
-                        updatePatientCommand.Parameters.AddWithValue("@PatientID", patient.PatientID);
-
-                        updatePatientCommand.ExecuteNonQuery();
-
-                        SqlCommand updateMedicalRecordCommand = new SqlCommand(
-                            "UPDATE MedicalRecords SET DoctorID = @DoctorID, Diagnosis = @Diagnosis, ExaminationDate = @ExaminationDate WHERE RecordID = @RecordID",
-                            connection, transaction);
-                        updateMedicalRecordCommand.Parameters.AddWithValue("@DoctorID", record.DoctorID);
-                        updateMedicalRecordCommand.Parameters.AddWithValue("@Diagnosis", record.Diagnosis);
-                        updateMedicalRecordCommand.Parameters.AddWithValue("@ExaminationDate", record.ExaminationDate);
-                        updateMedicalRecordCommand.Parameters.AddWithValue("@RecordID", record.RecordID);
-
-                        updateMedicalRecordCommand.ExecuteNonQuery();
-
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        MessageBox.Show($"Error: {ex.Message}");
-                    }
-                }
+                MessageBox.Show($"Error: {ex.Message}");
             }
-            LoadData();
         }
 
-        public void DeleteRecord(MedicalRecord record)
+
+
+        private void Update_Click(object sender, RoutedEventArgs e)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        SqlCommand deleteMedicalRecordCommand = new SqlCommand(
-                            "DELETE FROM MedicalRecords WHERE RecordID = @RecordID",
-                            connection, transaction);
-                        deleteMedicalRecordCommand.Parameters.AddWithValue("@RecordID", record.RecordID);
-
-                        deleteMedicalRecordCommand.ExecuteNonQuery();
-
-                        SqlCommand deletePatientCommand = new SqlCommand(
-                            "DELETE FROM Patients WHERE PatientID = @PatientID",
-                            connection, transaction);
-                        deletePatientCommand.Parameters.AddWithValue("@PatientID", record.PatientID);
-
-                        deletePatientCommand.ExecuteNonQuery();
-
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        MessageBox.Show($"Error: {ex.Message}");
-                    }
-                }
-            }
-            LoadData();
+            _dataContext.SubmitChanges();
         }
 
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = RecordsDataGrid.SelectedItem;
+
+            if (selectedItem != null)
+            {
+                switch (TableComboBox.SelectedItem.ToString())
+                {
+                    case "Doctors":
+                        _dataContext.GetTable<Doctors>().DeleteOnSubmit((Doctors)selectedItem);
+                        break;
+                    case "Patients":
+                        _dataContext.GetTable<Patients>().DeleteOnSubmit((Patients)selectedItem);
+                        break;
+                    case "MedicalRecords":
+                        _dataContext.GetTable<MedicalRecords>().DeleteOnSubmit((MedicalRecords)selectedItem);
+                        break;
+                }
+                _dataContext.SubmitChanges();
+                LoadData();
+            }
+        }
     }
 }

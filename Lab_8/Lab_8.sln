@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab_8", "Lab_8.csproj", "{011F4245-DA76-4C7E-9DB2-0B73BEE89EC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LINQtoData_Library", "..\LINQtoSQL_Library\LINQtoData_Library.csproj", "{1049E8CC-830D-4947-B073-1D76B9DA7C3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LINQtoSQL_Library", "..\LINQtoSQL_Library\LINQtoSQL_Library.csproj", "{1049E8CC-830D-4947-B073-1D76B9DA7C3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

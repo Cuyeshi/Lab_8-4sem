@@ -23,7 +23,7 @@ namespace LINQtoSQL_Library
 	
 	
 	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="OOPaP_67")]
-	public partial class MedicalDataContextDataContext : System.Data.Linq.DataContext
+	public partial class DatabaseDataContext : System.Data.Linq.DataContext
 	{
 		
 		private static System.Data.Linq.Mapping.MappingSource mappingSource = new AttributeMappingSource();
@@ -41,31 +41,31 @@ namespace LINQtoSQL_Library
     partial void DeletePatients(Patients instance);
     #endregion
 		
-		public MedicalDataContextDataContext() : 
+		public DatabaseDataContext() : 
 				base(global::LINQtoSQL_Library.Properties.Settings.Default.OOPaP_67ConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public MedicalDataContextDataContext(string connection) : 
+		public DatabaseDataContext(string connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public MedicalDataContextDataContext(System.Data.IDbConnection connection) : 
+		public DatabaseDataContext(System.Data.IDbConnection connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public MedicalDataContextDataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public DatabaseDataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public MedicalDataContextDataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public DatabaseDataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="OOPaP_67" Class="MedicalDataContextDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="OOPaP_67" Class="DatabaseDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
   <Connection Mode="AppSettings" ConnectionString="Data Source=DESKTOP-2GTDQ2V\SQLEXPRESS;Initial Catalog=OOPaP_67;Integrated Security=True;Encrypt=False" SettingsObjectName="LINQtoSQL_Library.Properties.Settings" SettingsPropertyName="OOPaP_67ConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Doctors" Member="Doctors">
     <Type Name="Doctors">

@@ -3,22 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <ComboBox Name="TableComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" SelectionChanged="TableComboBox_SelectionChanged">
-            <ComboBoxItem Content="Doctors" />
-            <ComboBoxItem Content="Patients" />
-            <ComboBoxItem Content="MedicalRecords" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ComboBox x:Name="TableComboBox" SelectionChanged="TableComboBox_SelectionChanged" Width="200" Height="30" Margin="16,11,0,0" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <ComboBoxItem Content="Doctors"/>
+            <ComboBoxItem Content="Patients"/>
+            <ComboBoxItem Content="MedicalRecords"/>
         </ComboBox>
-        <Button Content="Load Data" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="30" Margin="210,0,0,0" Click="LoadData_Click"/>
-        <Button Content="Create" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="30" Margin="320,0,0,0" Click="Create_Click"/>
-        <Button Content="Update" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="30" Margin="430,0,0,0" Click="Update_Click"/>
-        <Button Content="Delete" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="30" Margin="540,0,0,0" Click="Delete_Click"/>
 
-        <DataGrid Name="DataGrid" AutoGenerateColumns="True" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Height="300" Width="760"/>
-
-        <StackPanel Orientation="Horizontal">
-            <Button Content="Filter by Birth Year" Click="FilterByBirthYear_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="210,0,0,30" />
-            <Button Content="Count Patients per Doctor" Click="CountPatientsPerDoctor_Click" Height="31" IsDefault="True" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="30,0,-60,30" />
-            <Button Content="Group by Diagnosis" Click="GroupByDiagnosis_Click" Height="31" VerticalContentAlignment="Center" UseLayoutRounding="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="90,0,0,30" />
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="311,15,0,0">
+            <Button Content="Load Data" Click="LoadData_Click" Margin="5"/>
+            <Button Content="Create" Click="Create_Click" Margin="5"/>
+            <Button Content="Update" Click="Update_Click" Margin="5"/>
+            <Button Content="Delete" Click="Delete_Click" Margin="5"/>
         </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="239,366,0,0">
+            <Button Content="Filter by Birth Year" Click="FilterByBirthYear_Click" Margin="5"/>
+            <Button Content="Group by Diagnosis" Click="GroupByDiagnosis_Click" Margin="5"/>
+            <Button Content="Count Patients per Doctor" Click="CountPatientsPerDoctor_Click" Margin="5"/>
+        </StackPanel>
+        <DataGrid x:Name="DataGrid" Grid.Row="1" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn" AutoGenerateColumns="True" Margin="0,60,0,78"/>
     </Grid>
 </Window>

@@ -176,16 +176,16 @@ namespace Lab_8
         {
             if (TableComboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                if (selectedItem.Content.ToString() == "MedicalRecords")
+                if (selectedItem.Content.ToString() == "Doctors" || selectedItem.Content.ToString() == "Patients")
                 {
-                    if (e.PropertyName == "RecordID" || e.PropertyName == "Doctors" || e.PropertyName == "Patients")
+                    if (e.PropertyName == "MedicalRecords")
                     {
                         e.Cancel = true;
                     }
                 }
-                else if (selectedItem.Content.ToString() == "Doctors" || selectedItem.Content.ToString() == "Patients")
+                else if (selectedItem.Content.ToString() == "MedicalRecords")
                 {
-                    if (e.PropertyName == "MedicalRecords")
+                    if (e.PropertyName == "Doctors" || e.PropertyName == "Patients")
                     {
                         e.Cancel = true;
                     }

@@ -69,7 +69,7 @@ namespace Lab_8
         {
             if (DataGrid.SelectedItem == null)
             {
-                MessageBox.Show("Please select a record to update.");
+                MessageBox.Show("Пожалуйста, выберите запись для обновления.");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace Lab_8
 
                     if (selectedRecord == null)
                     {
-                        MessageBox.Show("Selected record is null.");
+                        MessageBox.Show("Выбранная запись равна null.");
                         return;
                     }
 
@@ -117,7 +117,7 @@ namespace Lab_8
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
@@ -125,7 +125,7 @@ namespace Lab_8
         {
             if (DataGrid.SelectedItem == null)
             {
-                MessageBox.Show("Please select a record to delete.");
+                MessageBox.Show("Пожалуйста, выберите запись для удаления.");
                 return;
             }
 
@@ -153,19 +153,6 @@ namespace Lab_8
             {
                 MessageBox.Show($"Error: {ex.Message}");
             }
-        }
-
-
-        private string GetTextBoxValue(string name)
-        {
-            var textBox = this.FindName(name) as TextBox;
-            return textBox?.Text;
-        }
-
-        private int GetIntValue(string name)
-        {
-            int.TryParse(GetTextBoxValue(name), out int value);
-            return value;
         }
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -205,5 +192,76 @@ namespace Lab_8
                 }
             }
         }
+
+
+
+
+
+        private void FilterByBirthYear_Click(object sender, RoutedEventArgs e)
+        {
+            var filterWindow = new FilterByBirthYearWindow();
+            if (filterWindow.ShowDialog() == true)
+            {
+                if (filterWindow.BirthYear.HasValue)
+                {
+                    FilterPatientsByBirthYear(filterWindow.BirthYear.Value);
+                }
+            }
+        }
+
+        private void GroupByDiagnosis_Click(object sender, RoutedEventArgs e)
+        {
+            GroupMedicalRecordsByDiagnosis();
+        }
+
+        private void CountPatientsPerDoctor_Click(object sender, RoutedEventArgs e)
+        {
+            CountPatientsPerDoctor();
+        }
+
+        private void FilterPatientsByBirthYear(int year)
+        {
+            var filteredPatients = from patient in _dataContext.GetTable<Patients>()
+                                   where patient.BirthYear > year
+                                   select patient;
+
+            DataGrid.ItemsSource = filteredPatients.ToList();
+        }
+
+        private void GroupMedicalRecordsByDiagnosis()
+        {
+            var groupedRecords = from record in _dataContext.GetTable<MedicalRecords>()
+                                 group record by record.Diagnosis into diagnosisGroup
+                                 select new
+                                 {
+                                     Diagnosis = diagnosisGroup.Key,
+                                     Count = diagnosisGroup.Count()
+                                 };
+
+            DataGrid.ItemsSource = groupedRecords.ToList();
+        }
+
+        private void CountPatientsPerDoctor()
+        {
+            var patientCountPerDoctor = from record in _dataContext.GetTable<MedicalRecords>()
+                                        group record by record.DoctorID into doctorGroup
+                                        select new
+                                        {
+                                            DoctorID = doctorGroup.Key,
+                                            PatientCount = doctorGroup.Select(r => r.PatientID).Distinct().Count()
+                                        };
+
+            var result = from doctor in _dataContext.GetTable<Doctors>()
+                         join groupData in patientCountPerDoctor on doctor.DoctorID equals groupData.DoctorID
+                         select new
+                         {
+                             DoctorName = doctor.FullName,
+                             groupData.PatientCount
+                         };
+
+            DataGrid.ItemsSource = result.ToList();
+        }
+
+
     }
 }

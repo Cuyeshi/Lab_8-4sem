@@ -1,0 +1,12 @@
+﻿<Window x:Class="Lab_8.FilterByBirthYearWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Filter by Birth Year" Height="150" Width="300">
+    <Grid>
+        <StackPanel Margin="10">
+            <TextBlock Text="Enter Birth Year:" Margin="0,0,0,10"/>
+            <TextBox Name="YearTextBox" Margin="0,0,0,10"/>
+            <Button Content="Confirm" Width="100" Click="Confirm_Click" HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</Window>

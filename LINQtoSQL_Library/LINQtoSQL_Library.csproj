@@ -43,11 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Database.designer.cs">
+    <Compile Include="DataBase.designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Database.dbml</DependentUpon>
+      <DependentUpon>DataBase.dbml</DependentUpon>
     </Compile>
+    <Compile Include="MedicalDataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -57,13 +58,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Database.dbml">
+    <None Include="DataBase.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
-      <LastGenOutput>Database.designer.cs</LastGenOutput>
+      <LastGenOutput>DataBase.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
-    <None Include="Database.dbml.layout">
-      <DependentUpon>Database.dbml</DependentUpon>
+    <None Include="DataBase.dbml.layout">
+      <DependentUpon>DataBase.dbml</DependentUpon>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

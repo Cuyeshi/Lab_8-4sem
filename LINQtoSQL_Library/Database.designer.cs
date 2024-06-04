@@ -23,7 +23,7 @@ namespace LINQtoSQL_Library
 	
 	
 	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="OOPaP_67")]
-	public partial class DatabaseDataContext : System.Data.Linq.DataContext
+	public partial class DataBaseDataContext : System.Data.Linq.DataContext
 	{
 		
 		private static System.Data.Linq.Mapping.MappingSource mappingSource = new AttributeMappingSource();
@@ -41,31 +41,31 @@ namespace LINQtoSQL_Library
     partial void DeletePatients(Patients instance);
     #endregion
 		
-		public DatabaseDataContext() : 
+		public DataBaseDataContext() : 
 				base(global::LINQtoSQL_Library.Properties.Settings.Default.OOPaP_67ConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public DatabaseDataContext(string connection) : 
+		public DataBaseDataContext(string connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public DatabaseDataContext(System.Data.IDbConnection connection) : 
+		public DataBaseDataContext(System.Data.IDbConnection connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public DatabaseDataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public DataBaseDataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public DatabaseDataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public DataBaseDataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
@@ -284,10 +284,10 @@ namespace LINQtoSQL_Library
 			{
 				if ((this._DoctorID != value))
 				{
-					if (this._Doctors.HasLoadedOrAssignedValue)
+					/*if (this._Doctors.HasLoadedOrAssignedValue)
 					{
 						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
+					}*/
 					this.OnDoctorIDChanging(value);
 					this.SendPropertyChanging();
 					this._DoctorID = value;

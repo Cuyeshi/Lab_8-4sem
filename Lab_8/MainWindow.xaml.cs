@@ -9,120 +9,145 @@ namespace Lab_8
 {
     public partial class MainWindow : Window
     {
-        private DataContext _dataContext;
+        private readonly DataContext _dataContext;
+        private int _tempDoctorId;
+        private int _tempPatientId;
 
         public MainWindow()
         {
             InitializeComponent();
-            LoadTableComboBox();
-        }
-
-        private void LoadTableComboBox()
-        {
-            TableComboBox.Items.Add("Doctors");
-            TableComboBox.Items.Add("Patients");
-            TableComboBox.Items.Add("MedicalRecords");
+            _dataContext = new DataContext(@"Data Source=DESKTOP-2GTDQ2V\SQLEXPRESS;Initial Catalog=OOPaP_67;Integrated Security=True");
         }
 
         private void TableComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            LoadData();
-        }
-
-        private void LoadData()
-        {
-            _dataContext = new DataContext("Data Source=DESKTOP-2GTDQ2V\\SQLEXPRESS;Initial " +
-                                                    "Catalog=OOPaP_67;Integrated Security=True");
-
-            switch (TableComboBox.SelectedItem.ToString())
+            if (TableComboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                case "Doctors":
-                    RecordsDataGrid.ItemsSource = _dataContext.GetTable<Doctors>().ToList();
-                    break;
-                case "Patients":
-                    RecordsDataGrid.ItemsSource = _dataContext.GetTable<Patients>().ToList();
-                    break;
-                case "MedicalRecords":
-                    RecordsDataGrid.ItemsSource = _dataContext.GetTable<MedicalRecords>().ToList();
-                    break;
+                switch (selectedItem.Content.ToString())
+                {
+                    case "Doctors":
+                        DataGrid.ItemsSource = _dataContext.GetTable<Doctors>().ToList();
+                        break;
+                    case "Patients":
+                        DataGrid.ItemsSource = _dataContext.GetTable<Patients>().ToList();
+                        break;
+                    case "MedicalRecords":
+                        DataGrid.ItemsSource = _dataContext.GetTable<MedicalRecords>().ToList();
+                        break;
+                }
             }
         }
 
-        private void Add_Click(object sender, RoutedEventArgs e)
+        private void LoadData_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if (TableComboBox.SelectedItem == null)
-                {
-                    MessageBox.Show("Please select a table.");
-                    return;
-                }
+            TableComboBox_SelectionChanged(null, null);
+        }
 
-                switch (TableComboBox.SelectedItem.ToString())
+        private void Create_Click(object sender, RoutedEventArgs e)
+        {
+            if (TableComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                switch (selectedItem.Content.ToString())
                 {
                     case "Doctors":
                         var newDoctor = new Doctors
                         {
-                            FullName = FullNameTextBox.Text
+                            FullName = GetTextBoxValue("DoctorNameTextBox")
                         };
-
-                        if (string.IsNullOrEmpty(newDoctor.FullName))
+                        if (string.IsNullOrWhiteSpace(newDoctor.FullName))
                         {
-                            MessageBox.Show("Full Name is required for Doctors.");
+                            MessageBox.Show("Please enter the doctor's full name.");
                             return;
                         }
-
                         _dataContext.GetTable<Doctors>().InsertOnSubmit(newDoctor);
                         break;
 
                     case "Patients":
-                        if (string.IsNullOrEmpty(FullNameTextBox.Text) ||
-                            string.IsNullOrEmpty(BirthYearTextBox.Text) ||
-                            string.IsNullOrEmpty(HeightTextBox.Text) ||
-                            string.IsNullOrEmpty(WeightTextBox.Text) ||
-                            string.IsNullOrEmpty(BloodPressureTextBox.Text))
-                        {
-                            MessageBox.Show("All fields are required for Patients.");
-                            return;
-                        }
-
                         var newPatient = new Patients
                         {
-                            FullName = FullNameTextBox.Text,
-                            BirthYear = int.Parse(BirthYearTextBox.Text),
-                            Height = int.Parse(HeightTextBox.Text),
-                            Weight = int.Parse(WeightTextBox.Text),
-                            BloodPressure = BloodPressureTextBox.Text
+                            FullName = GetTextBoxValue("PatientNameTextBox"),
+                            BirthYear = GetIntValue("BirthYearTextBox"),
+                            Height = GetIntValue("HeightTextBox"),
+                            Weight = GetIntValue("WeightTextBox"),
+                            BloodPressure = GetTextBoxValue("BloodPressureTextBox")
                         };
-
+                        if (string.IsNullOrWhiteSpace(newPatient.FullName))
+                        {
+                            MessageBox.Show("Please enter the patient's full name.");
+                            return;
+                        }
                         _dataContext.GetTable<Patients>().InsertOnSubmit(newPatient);
                         break;
 
                     case "MedicalRecords":
-                        if (string.IsNullOrEmpty(FullNameTextBox.Text) ||
-                            string.IsNullOrEmpty(BirthYearTextBox.Text) ||
-                            string.IsNullOrEmpty(HeightTextBox.Text) ||
-                            string.IsNullOrEmpty(WeightTextBox.Text) ||
-                            string.IsNullOrEmpty(BloodPressureTextBox.Text))
+                        var doctorId = GetIntValue("DoctorIDTextBox");
+                        var patientId = GetIntValue("PatientIDTextBox");
+                        var diagnosis = GetTextBoxValue("DiagnosisTextBox");
+
+                        if (doctorId == 0 || patientId == 0 || string.IsNullOrWhiteSpace(diagnosis))
                         {
-                            MessageBox.Show("All fields are required for Medical Records.");
+                            MessageBox.Show("Please enter all medical record details.");
                             return;
                         }
 
-                        var newRecord = new MedicalRecords
+                        var newMedicalRecord = new MedicalRecords
                         {
-                            DoctorID = int.Parse(BirthYearTextBox.Text), // Example value, replace with actual input
-                            PatientID = int.Parse(HeightTextBox.Text), // Example value, replace with actual input
-                            Diagnosis = WeightTextBox.Text, // Example value, replace with actual input
+                            DoctorID = doctorId,
+                            PatientID = patientId,
+                            Diagnosis = diagnosis,
                             ExaminationDate = DateTime.Now
                         };
-
-                        _dataContext.GetTable<MedicalRecords>().InsertOnSubmit(newRecord);
+                        _dataContext.GetTable<MedicalRecords>().InsertOnSubmit(newMedicalRecord);
                         break;
                 }
-
                 _dataContext.SubmitChanges();
-                LoadData();
+                TableComboBox_SelectionChanged(null, null);
+            }
+        }
+
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataGrid.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a record to update.");
+                return;
+            }
+
+            try
+            {
+                if (TableComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content.ToString() == "MedicalRecords")
+                {
+                    var selectedRecord = DataGrid.SelectedItem as MedicalRecords;
+
+                    // Save the new values to temporary variables
+                    int newDoctorId = _tempDoctorId != 0 ? _tempDoctorId : selectedRecord.DoctorID;
+                    int newPatientId = _tempPatientId != 0 ? _tempPatientId : selectedRecord.PatientID;
+
+                    // Delete the existing record
+                    _dataContext.GetTable<MedicalRecords>().DeleteOnSubmit(selectedRecord);
+                    _dataContext.SubmitChanges();
+
+                    // Create a new record with the updated values
+                    var updatedRecord = new MedicalRecords
+                    {
+                        DoctorID = newDoctorId,
+                        PatientID = newPatientId,
+                        Diagnosis = selectedRecord.Diagnosis,
+                        ExaminationDate = selectedRecord.ExaminationDate
+                    };
+
+                    _dataContext.GetTable<MedicalRecords>().InsertOnSubmit(updatedRecord);
+                    _dataContext.SubmitChanges();
+
+                    // Reset temporary variables
+                    _tempDoctorId = 0;
+                    _tempPatientId = 0;
+                }
+                else
+                {
+                    _dataContext.SubmitChanges();
+                }
+                TableComboBox_SelectionChanged(null, null);
             }
             catch (Exception ex)
             {
@@ -130,33 +155,75 @@ namespace Lab_8
             }
         }
 
-
-
-        private void Update_Click(object sender, RoutedEventArgs e)
-        {
-            _dataContext.SubmitChanges();
-        }
-
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            var selectedItem = RecordsDataGrid.SelectedItem;
+            if (DataGrid.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a record to delete.");
+                return;
+            }
 
-            if (selectedItem != null)
+            try
             {
                 switch (TableComboBox.SelectedItem.ToString())
                 {
                     case "Doctors":
-                        _dataContext.GetTable<Doctors>().DeleteOnSubmit((Doctors)selectedItem);
+                        _dataContext.GetTable<Doctors>().DeleteOnSubmit(DataGrid.SelectedItem as Doctors);
                         break;
                     case "Patients":
-                        _dataContext.GetTable<Patients>().DeleteOnSubmit((Patients)selectedItem);
+                        _dataContext.GetTable<Patients>().DeleteOnSubmit(DataGrid.SelectedItem as Patients);
                         break;
+
                     case "MedicalRecords":
-                        _dataContext.GetTable<MedicalRecords>().DeleteOnSubmit((MedicalRecords)selectedItem);
+                        _dataContext.GetTable<MedicalRecords>().DeleteOnSubmit(DataGrid.SelectedItem as MedicalRecords);
                         break;
                 }
                 _dataContext.SubmitChanges();
-                LoadData();
+                TableComboBox_SelectionChanged(null, null);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
+        }
+
+        private string GetTextBoxValue(string name)
+        {
+            var textBox = this.FindName(name) as TextBox;
+            return textBox?.Text;
+        }
+
+        private int GetIntValue(string name)
+        {
+            int.TryParse(GetTextBoxValue(name), out int value);
+            return value;
+        }
+
+        private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            var column = e.Column as DataGridBoundColumn;
+            if (column != null && e.Row.Item is MedicalRecords record)
+            {
+                var bindingPath = (column.Binding as System.Windows.Data.Binding).Path.Path;
+                if (bindingPath == "DoctorID")
+                {
+                    _tempDoctorId = Convert.ToInt32((e.EditingElement as TextBox).Text);
+                }
+                else if (bindingPath == "PatientID")
+                {
+                    _tempPatientId = Convert.ToInt32((e.EditingElement as TextBox).Text);
+                }
+            }
+        }
+
+        private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (TableComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content.ToString() == "MedicalRecords")
+            {
+                if (e.PropertyName == "RecordID" || e.PropertyName == "Doctors" || e.PropertyName == "Patients")
+                {
+                    e.Cancel = true;
+                }
             }
         }
     }

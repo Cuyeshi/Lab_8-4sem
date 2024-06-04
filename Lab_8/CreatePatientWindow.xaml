@@ -1,0 +1,27 @@
+﻿<Window x:Class="Lab_8.CreatePatientWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create Patient" Height="300" Width="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="10">
+            <Label Content="Full Name:"/>
+            <TextBox x:Name="FullNameTextBox"/>
+            <Label Content="Birth Year:"/>
+            <TextBox x:Name="BirthYearTextBox"/>
+            <Label Content="Height:"/>
+            <TextBox x:Name="HeightTextBox"/>
+            <Label Content="Weight:"/>
+            <TextBox x:Name="WeightTextBox"/>
+            <Label Content="Blood Pressure:"/>
+            <TextBox x:Name="BloodPressureTextBox"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button Content="Confirm" Click="Confirm_Click" Width="100" Margin="5"/>
+            <Button Content="Cancel" Click="Cancel_Click" Width="100" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Data.Linq;
+using Lab_8;
 using LINQtoSQL_Library;
 
 namespace Lab_8
@@ -47,60 +48,20 @@ namespace Lab_8
         {
             if (TableComboBox.SelectedItem is ComboBoxItem selectedItem)
             {
+                Window createWindow = null;
                 switch (selectedItem.Content.ToString())
                 {
                     case "Doctors":
-                        var newDoctor = new Doctors
-                        {
-                            FullName = GetTextBoxValue("DoctorNameTextBox")
-                        };
-                        if (string.IsNullOrWhiteSpace(newDoctor.FullName))
-                        {
-                            MessageBox.Show("Please enter the doctor's full name.");
-                            return;
-                        }
-                        _dataContext.GetTable<Doctors>().InsertOnSubmit(newDoctor);
+                        createWindow = new CreateDoctorWindow();
                         break;
-
                     case "Patients":
-                        var newPatient = new Patients
-                        {
-                            FullName = GetTextBoxValue("PatientNameTextBox"),
-                            BirthYear = GetIntValue("BirthYearTextBox"),
-                            Height = GetIntValue("HeightTextBox"),
-                            Weight = GetIntValue("WeightTextBox"),
-                            BloodPressure = GetTextBoxValue("BloodPressureTextBox")
-                        };
-                        if (string.IsNullOrWhiteSpace(newPatient.FullName))
-                        {
-                            MessageBox.Show("Please enter the patient's full name.");
-                            return;
-                        }
-                        _dataContext.GetTable<Patients>().InsertOnSubmit(newPatient);
+                        createWindow = new CreatePatientWindow();
                         break;
-
                     case "MedicalRecords":
-                        var doctorId = GetIntValue("DoctorIDTextBox");
-                        var patientId = GetIntValue("PatientIDTextBox");
-                        var diagnosis = GetTextBoxValue("DiagnosisTextBox");
-
-                        if (doctorId == 0 || patientId == 0 || string.IsNullOrWhiteSpace(diagnosis))
-                        {
-                            MessageBox.Show("Please enter all medical record details.");
-                            return;
-                        }
-
-                        var newMedicalRecord = new MedicalRecords
-                        {
-                            DoctorID = doctorId,
-                            PatientID = patientId,
-                            Diagnosis = diagnosis,
-                            ExaminationDate = DateTime.Now
-                        };
-                        _dataContext.GetTable<MedicalRecords>().InsertOnSubmit(newMedicalRecord);
+                        createWindow = new CreateMedicalRecordWindow();
                         break;
                 }
-                _dataContext.SubmitChanges();
+                createWindow.ShowDialog();
                 TableComboBox_SelectionChanged(null, null);
             }
         }
@@ -218,11 +179,21 @@ namespace Lab_8
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            if (TableComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content.ToString() == "MedicalRecords")
+            if (TableComboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                if (e.PropertyName == "RecordID" || e.PropertyName == "Doctors" || e.PropertyName == "Patients")
+                if (selectedItem.Content.ToString() == "MedicalRecords")
                 {
-                    e.Cancel = true;
+                    if (e.PropertyName == "RecordID" || e.PropertyName == "Doctors" || e.PropertyName == "Patients")
+                    {
+                        e.Cancel = true;
+                    }
+                }
+                else if (selectedItem.Content.ToString() == "Doctors" || selectedItem.Content.ToString() == "Patients")
+                {
+                    if (e.PropertyName == "MedicalRecords")
+                    {
+                        e.Cancel = true;
+                    }
                 }
             }
         }

@@ -1,0 +1,19 @@
+﻿<Window x:Class="Lab_8.CreateDoctorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create Doctor" Height="200" Width="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="10">
+            <Label Content="Full Name:"/>
+            <TextBox x:Name="FullNameTextBox"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button Content="Confirm" Click="Confirm_Click" Width="100" Margin="5"/>
+            <Button Content="Cancel" Click="Cancel_Click" Width="100" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Data.Linq;
-using Lab_8;
 using LINQtoSQL_Library;
 
 namespace Lab_8
@@ -80,6 +79,12 @@ namespace Lab_8
                 {
                     var selectedRecord = DataGrid.SelectedItem as MedicalRecords;
 
+                    if (selectedRecord == null)
+                    {
+                        MessageBox.Show("Selected record is null.");
+                        return;
+                    }
+
                     // Save the new values to temporary variables
                     int newDoctorId = _tempDoctorId != 0 ? _tempDoctorId : selectedRecord.DoctorID;
                     int newPatientId = _tempPatientId != 0 ? _tempPatientId : selectedRecord.PatientID;
@@ -126,27 +131,30 @@ namespace Lab_8
 
             try
             {
-                switch (TableComboBox.SelectedItem.ToString())
+                if (TableComboBox.SelectedItem is ComboBoxItem selectedItem)
                 {
-                    case "Doctors":
-                        _dataContext.GetTable<Doctors>().DeleteOnSubmit(DataGrid.SelectedItem as Doctors);
-                        break;
-                    case "Patients":
-                        _dataContext.GetTable<Patients>().DeleteOnSubmit(DataGrid.SelectedItem as Patients);
-                        break;
-
-                    case "MedicalRecords":
-                        _dataContext.GetTable<MedicalRecords>().DeleteOnSubmit(DataGrid.SelectedItem as MedicalRecords);
-                        break;
+                    switch (selectedItem.Content.ToString())
+                    {
+                        case "Doctors":
+                            _dataContext.GetTable<Doctors>().DeleteOnSubmit(DataGrid.SelectedItem as Doctors);
+                            break;
+                        case "Patients":
+                            _dataContext.GetTable<Patients>().DeleteOnSubmit(DataGrid.SelectedItem as Patients);
+                            break;
+                        case "MedicalRecords":
+                            _dataContext.GetTable<MedicalRecords>().DeleteOnSubmit(DataGrid.SelectedItem as MedicalRecords);
+                            break;
+                    }
+                    _dataContext.SubmitChanges();
+                    TableComboBox_SelectionChanged(null, null);
                 }
-                _dataContext.SubmitChanges();
-                TableComboBox_SelectionChanged(null, null);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error: {ex.Message}");
             }
         }
+
 
         private string GetTextBoxValue(string name)
         {
